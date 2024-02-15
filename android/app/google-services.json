@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "8775464826",
+    "project_id": "hobby-tracker-d0426",
+    "storage_bucket": "hobby-tracker-d0426.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8775464826:android:b20437e01e9e67e18008c3",
+        "android_client_info": {
+          "package_name": "com.example.hobby_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpqKauP0_RonzNIn9gv3ln-AZfboPiAIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
