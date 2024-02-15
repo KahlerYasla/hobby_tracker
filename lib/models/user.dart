@@ -5,7 +5,6 @@ class User {
   String email;
   DateTime birthdate;
   String bio;
-  List<User> friends;
 
   User({
     required this.id,
@@ -14,7 +13,6 @@ class User {
     required this.email,
     required this.birthdate,
     required this.bio,
-    this.friends = const [],
   });
 
   Map<String, dynamic> toMap(User user) {
@@ -25,7 +23,6 @@ class User {
       'email': user.email,
       'birthdate': user.birthdate,
       'bio': user.bio,
-      'friends': user.friends,
     };
   }
 
@@ -35,6 +32,5 @@ class User {
         surname = map['surname'],
         email = map['email'],
         birthdate = map['birthdate'],
-        bio = map['bio'],
-        friends = map['friends'];
+        bio = map['bio'];
 }

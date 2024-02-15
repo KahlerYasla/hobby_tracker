@@ -16,8 +16,8 @@ class HobbyService {
     return await _repository.getHobbyById(id);
   }
 
-  Future<void> addHobby(Hobby hobby) async {
-    await _repository.addHobby(hobby);
+  Future<void> addHobby(Hobby hobby, String userId) async {
+    await _repository.addHobby(hobby, userId);
   }
 
   Future<void> updateHobby(Hobby hobby) async {

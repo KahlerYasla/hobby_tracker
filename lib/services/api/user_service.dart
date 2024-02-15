@@ -8,6 +8,10 @@ class UserService {
     return _userRepository.getCurrentUser(email);
   }
 
+  Future<bool> createUser(User user) async {
+    return _userRepository.createUser(user);
+  }
+
   Future<void> signOut() async {
     return _userRepository.signOut();
   }

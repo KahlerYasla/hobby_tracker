@@ -5,7 +5,7 @@ class HobbyRepository {
   final CollectionReference _hobbiesCollection =
       FirebaseFirestore.instance.collection('hobbies');
 
-  final CollectionReference _users_hobbiesCollection =
+  get _usersHobbiesCollection =>
       FirebaseFirestore.instance.collection('users_hobbies');
 
   Future<List<Hobby>> getAllHobbies() async {
@@ -23,14 +23,14 @@ class HobbyRepository {
   Future<Hobby> getHobbyById(String id) async {
     DocumentSnapshot snapshot = await _hobbiesCollection.doc(id).get();
     return Hobby.fromMap(
-      snapshot.data(),
+      snapshot.data() as Map<String, dynamic>,
     );
   }
 
   Future<List<Hobby>> getAllHobbiesByUserId(String userId) async {
     // get all hobbies with paired the userId from users_hobbies collection
     QuerySnapshot snapshotOfHobbiesIds =
-        await _users_hobbiesCollection.where('userId', isEqualTo: userId).get();
+        await _usersHobbiesCollection.where('userId', isEqualTo: userId).get();
 
     QuerySnapshot snapshotOfHobbies = await _hobbiesCollection
         .where('id',
@@ -48,10 +48,16 @@ class HobbyRepository {
     }
   }
 
-  Future<void> addHobby(Hobby hobby) async {
+  Future<void> addHobby(Hobby hobby, String userId) async {
     await _hobbiesCollection.add(
       hobby.toMap(hobby),
     );
+
+    // add the hobby to the user's hobbies
+    await _usersHobbiesCollection.add({
+      'userId': userId,
+      'hobbyId': hobby.id,
+    });
   }
 
   Future<void> updateHobby(Hobby hobby) async {

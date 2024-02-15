@@ -3,6 +3,8 @@ import 'package:hobby_tracker/models/hobby.dart';
 import 'package:hobby_tracker/models/user.dart';
 import 'package:hobby_tracker/services/api/hobby_service.dart';
 import 'package:hobby_tracker/services/api/user_service.dart';
+import 'package:hobby_tracker/widgets/user_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +14,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<String?> get userEmail async {
+    final SharedPreferences prefs = await _prefs;
+    return prefs.getString('userEmail');
+  }
+
   final HobbyService _hobbyService = HobbyService();
   final UserService _userService = UserService();
 
@@ -48,41 +57,54 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addHobby(context),
+        child: Icon(Icons.add),
+      ),
     );
   }
-}
 
-class UserCard extends StatelessWidget {
-  final UserService userService;
-
-  const UserCard({super.key, required this.userService});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<User>(
-      future: userService.getCurrentUser() as Future<User>?,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          User user = snapshot.data!;
-          return Card(
-            child: ListTile(
-              title: Text('${user.name} ${user.surname}'),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Email: ${user.email}'),
-                  Text('Birthdate: ${user.birthdate}'),
-                  Text('Bio: ${user.bio}'),
-                ],
-              ),
+  Future<void> _addHobby(BuildContext context) async {
+    // Implement your logic to add a hobby
+    // For example, you might show a dialog with a text field for the hobby name
+    String? hobbyName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Hobby'),
+          content: TextField(
+            decoration: InputDecoration(labelText: 'Hobby Name'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
             ),
-          );
-        }
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, 'Hobby Name');
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
       },
     );
+
+    if (hobbyName != null) {
+      User? user = await _userService.getCurrentUser(userEmail as String);
+      int userId = user.id as int;
+
+      // Call HobbyService to add the hobby
+      await _hobbyService.addHobby(
+        Hobby(id: '-1', name: hobbyName),
+        userId.toString(),
+      );
+
+      // Refresh the hobby list
+      setState(() {});
+    }
   }
 }

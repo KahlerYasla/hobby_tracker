@@ -1,11 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hobby_tracker/repositories/user_repository.dart';
+import 'package:hobby_tracker/screens/register_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hobby_tracker/screens/home_screen.dart';
 import 'package:hobby_tracker/screens/login_screen.dart';
 
 class HobbyTrackerApp extends StatelessWidget {
-  const HobbyTrackerApp({Key? key}) : super(key: key);
+  HobbyTrackerApp({super.key});
+
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<bool> get isSignedIn async {
+    final SharedPreferences prefs = await _prefs;
+    return prefs.getBool('isSignedIn') ?? false;
+  }
+
+  Future<String?> get userEmail async {
+    final SharedPreferences prefs = await _prefs;
+    return prefs.getString('userEmail');
+  }
+
+  Future<void> setSignInStatus(bool value) async {
+    final SharedPreferences prefs = await _prefs;
+    await prefs.setBool('isSignedIn', value);
+  }
+
+  Future<void> setUserEmail(String email) async {
+    final SharedPreferences prefs = await _prefs;
+    await prefs.setString('userEmail', email);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +39,11 @@ class HobbyTrackerApp extends StatelessWidget {
     ));
 
     return MaterialApp(
+      routes: {
+        '/home': (context) => HomeScreen(),
+        '/login': (context) => LoginScreen(),
+        '/register': (context) => RegisterScreen(),
+      },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -27,25 +55,22 @@ class HobbyTrackerApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'UbuntuMono',
       ),
-      home: Scaffold(
-        body: SafeArea(
-          child: Scaffold(
-            body: StreamBuilder<bool>(
-              initialData: false,
-              stream: authStream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.active) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError || snapshot.data == null) {
-                  return const Center(child: Text('Something went wrong'));
-                } else {
-                  final signedIn = snapshot.data ?? false;
-                  return signedIn ? HomeScreen() : const LoginScreen();
-                }
-              },
-            ),
-          ),
-        ),
+      home: FutureBuilder<bool>(
+        future: isSignedIn,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else {
+            bool isSignedIn = snapshot.data ?? false;
+            return Scaffold(
+              body: SafeArea(
+                child: Scaffold(
+                  body: isSignedIn ? const HomeScreen() : LoginScreen(),
+                ),
+              ),
+            );
+          }
+        },
       ),
     );
   }
